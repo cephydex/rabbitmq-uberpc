@@ -1,0 +1,54 @@
+version: "3.8"
+services:
+    rabbitmq3:
+        container_name: "rabbitmq"
+        restart: "unless-stopped"
+        image: rabbitmq:3.8-management-alpine
+        environment:
+            - RABBITMQ_DEFAULT_USER=myuser
+            - RABBITMQ_DEFAULT_PASS=mypassword
+        ports:
+            # AMQP protocol port
+            - '5672:5672'
+            # HTTP management UI
+            - '15672:15672'
+
+    prod:
+      build: .
+      container_name: msgworker
+      restart: "unless-stopped"
+      ports:
+        - "5670:8000"
+      volumes:
+        - "./prod:/app"
+
+    recv:
+      build:
+        context: .
+        dockerfile: recv.Dockerfile
+      
+      container_name: msgreceiver
+      depends_on:
+        - rabbitmq
+        - prod
+      restart: "unless-stopped"
+      ports:
+        - "5673:8000"
+      volumes:
+        - "./recv:/app"
+
+    recv2:
+      build:
+        context: .
+        dockerfile: recv2.Dockerfile
+      
+      container_name: msgreceiver2
+      depends_on:
+        - rabbitmq
+        - prod
+
+      restart: "unless-stopped"
+      ports:
+        - "5671:8000"
+      volumes:
+        - "./recv2:/app"

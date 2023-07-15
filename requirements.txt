@@ -1,0 +1,5 @@
+fastapi[all]
+python-dotenv
+httpx[http2]
+uvicorn==0.22.0
+pika
